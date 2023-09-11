@@ -1,0 +1,75 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+## Pendahuluan
+
+Perkembangan teknologi sekuensing membuat ketersediaan data sekuen DNA dan/atau RNA menjadi lebih cepat dan lebih banyak. Untuk pengolahan data sekuen besar seperti *whole genome assembly*,*differential expression*, *phylogenomic*, dinamika molekuler dan lainnya dibutuhkan sumber daya komputasi yang besar (cluster). BRIN menyediakan layanan komputasi yang dapat diakses melalui [elsa](https://elsa.brin.go.id/layanan/perlaboratorium/Laboratorium%20High%20Performance%20Computing%20HPC/179?subkategori_id=&sorting=&keywords=).
+
+## Panduan mengakses cluster
+
+### Login dan Logout dari cluster
+Akses ke dalam cluster dapat dilakukan setelah *user* mengunggah PUBLIC KEY pada logbook elsa. Setelah *user* mendapatkan akses ke cluster, *user* dapat masuk dengan menggunakan **SSH Client** yang diakses dari **terminal** atau **power shell** yang sama dengan pembuatan **ssh key**. Setelah masuk ke **terminal** atau **power shell**, *user* dapat mengetikkan
+```{}
+ssh username@login.hpc.brin.go.id
+```
+atau
+```{}
+ssh username@login2.hpc.brin.go.id
+```
+contoh:
+```{}
+ssh ruby002@login2.hpc.brin.go.id
+```
+![Gambar 1. Tampilan SSH client setelah berhasil mengakses cluster](user_manual_insertimage_1.png)
+
+*User* akan berada pada *login mode* setelah berhasil masuk ke cluster (Gambar 1). Pada cluster HPC, *user* dapat mengakses 3 mode yaitu:
+
+#. __*login mode*__
+#. __*interactive mode*__
+#. __*batch mode*__
+
+Penjelasan ketiga mode tersebut akan dijelaskan pada *section* tersendiri.
+
+*User* akan dapat keluar dari *login mode* dengan mengetikkan ```logout``` pada terminal atau powershell. Jika tidak ada aktifitas pada *login mode* lebih dari 30 menit, *user* akan otomatis keluar dari cluster.
+
+### __Mode cluster__
+#### __*Login mode*__
+Pada login mode, *user* dapat melakukan transfer data, membuat job script dan meng*install* modul. *User* tidak dapat melakukan analisis pada mode ini.
+
+#### __*Interactive mode*__
+Pada *interactive mode*, *user* dapat menjalankan aplikasi atau module (*job*) secara interaktif dengan mengetik perintah (*command*) pada terminal. Pada mode ini, *user* hanya diberikan sumberdaya komputasi yang terbatas yaitu maksimal 1 node dengan 8 cores CPU dan waktu 12 jam. Setelah 12 jam, *job* akan terhapus otomatis dari cluster.
+*Interactive mode* dapat diakses oleh *user* dengan memasukkan perintah berikut di *login mode*:
+
+#. ```mlogin [jumlah core]``` anda akan masuk ke *interactive mode* dan diberikan 1 computing node dengan jumlah core CPU sesuai *request* (maksimal 8 cores)
+#. ```mlogingpu``` anda akan masuk ke *interactive mode* dan diberikan computing node dengan GPU *accelerator*
+
+#### __*Batch mode*___
+Pada *batch mode*, *user* dapat melakukan *submit job* secara non-interaktif dengan melakukan *request* menggunakan PBS *script* yang setidaknya memuat:
+
+#. Bash Shebang, ```#!/bin/bash```
+#. Job name, ```#PBS -N my_job```
+#. Queue type, ```#PBS -q cpuq```
+#. Waktu maksimum eksekusi job (walltime) dalam format HH:MM:SS, ```#PBS -l walltime 01:00:00```
+#. Jumlah node dan CPUs, ```#PBS -l nodes=1:ppn=24```
+#. Perintah *job* yang akan dikerjakan
+
+PBS *script* diawali dengan ```#PBS``` atau dikenal dengan PBS *directive* yang merinci kebutuhan sumberdaya dan atribut lain dari *job* yang akan di*submit*. Pada contoh dibawah, akan dilakukan *job* rekonstruksi pohon *maximum-likelihood* dengan menggunakan modul **iqtree** dan file alignment dengan nama *sequence_alignment* dalam format **PHYLIP**. *Job* akan dikerjakan dengan kebutuhan sebagai berikut:
+
+* *job* membutuhkan 1 node, 24 prosesor dan 32 GB RAM
+* Untuk menyelesaikan *job* dibutuhkan waktu kurang dari 80 menit (1 jam 20 menit)
+* nama *job* adalah my_job
+* *batch queue* yang akan digunakan adalah cpuq
+Contoh:
+```{}
+#!/bin/bash  
+#PBS -N my_job
+#PBS -q cpuq
+#PBS -l walltime 01:20:00
+#PBS -l nodes=1:ppn=24
+#PBS -l mem=32gb
+
+iqtree -s sequence_alignment.phy
+```
